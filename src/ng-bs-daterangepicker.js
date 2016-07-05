@@ -28,6 +28,7 @@
 						return index === 0 && parseInt(elem, 10) || elem;
 					}));
 					options.ranges = $attributes.ranges && $parse($attributes.ranges)($scope);
+					var optionsRangeArray = Object.keys(options.ranges).map(function(k) { return k; });
 					options.locale = $attributes.locale && $parse($attributes.locale)($scope);
 					options.opens = $attributes.opens || $parse($attributes.opens)($scope);
 
@@ -56,6 +57,17 @@
 						if (!ngModel.$viewValue || !ngModel.$viewValue.startDate) {
 							return;
 						}
+
+						var label = ngModel.$viewValue.label,
+							anyTime = optionsRangeArray[0],
+							overdue = optionsRangeArray[1],
+							noDueDate = optionsRangeArray[2];
+
+						if(label === anyTime || label === overdue || label === noDueDate) {
+							$element.val(label);
+							return;
+						}
+
 						$element.val(formatted(ngModel.$viewValue));
 					};
 
@@ -79,7 +91,7 @@
 						$element.data('daterangepicker').endDate = momentify($scope[modelValue].endDate);
 						$element.data('daterangepicker').updateView();
 						$element.data('daterangepicker').updateCalendars();
-						$element.data('daterangepicker').updateInputText();
+						$element.data('daterangepicker').updateFormInputs();
 
 					});
 
@@ -87,14 +99,11 @@
 
 						var modelValue = ngModel.$viewValue;
 
-						if (angular.equals(start, modelValue.startDate) && angular.equals(end, modelValue.endDate)) {
-							return;
-						}
-
 						$scope.$apply(function() {
 							ngModel.$setViewValue({
 								startDate: (moment.isMoment(modelValue.startDate)) ? start : start.toDate(),
-								endDate: (moment.isMoment(modelValue.endDate)) ? end : end.toDate()
+								endDate: (moment.isMoment(modelValue.endDate)) ? end : end.toDate(),
+								label: label
 							});
 							ngModel.$render();
 						});
